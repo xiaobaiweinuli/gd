@@ -18,7 +18,7 @@ async def bot_node(event):
         '''
         await jdbot.send_message(chat_id, res)
     else:
-        await cmd('{} {}'.format(TASK_CMD, text))
+        await cmd(f'{TASK_CMD} {text}')
 
 if ch_name:
     jdbot.add_event_handler(bot_node, events.NewMessage(

@@ -7,10 +7,7 @@ from telethon import events
 
 from .. import jdbot, logger, chat_id, BOT_SET, ch_name, CONFIG_DIR
 
-if os.environ.get('QL_DIR'):
-    AUTH_FILE = f'{CONFIG_DIR}/auth.json'
-else:
-    AUTH_FILE = None
+AUTH_FILE = f'{CONFIG_DIR}/auth.json' if os.environ.get('QL_DIR') else None
 
 
 @jdbot.on(events.NewMessage(chats=chat_id, pattern=r'^/auth$'))
@@ -22,10 +19,7 @@ async def bot_ql_login(event):
     try:
         if isinstance(msg_text, list) and len(msg_text) == 2:
             code_login = msg_text[-1]
-            if len(code_login) == 6:
-                res = ql_login(code_login)
-            else:
-                res = '两步验证的验证码有误'
+            res = ql_login(code_login) if len(code_login) == 6 else '两步验证的验证码有误'
         else:
             res = ql_login()
         await jdbot.edit_message(msg, res)
@@ -72,7 +66,7 @@ def ql_login(code: str = None):
             return ' 当前登录已过期，且已开启两步登录验证，请使用命令/auth 六位验证码 完成登录'
         return res['message']
     except Exception as e:
-        return '自动登录出错：' + str(e)
+        return f'自动登录出错：{str(e)}'
 
 
 if ch_name:

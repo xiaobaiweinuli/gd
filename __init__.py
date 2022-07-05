@@ -35,19 +35,15 @@ if not os.path.exists(f"{LOG_DIR}/bot"):
 if os.path.exists(BOT_JSON_FILE):
     with open(BOT_JSON_FILE, "r", encoding="utf-8") as f:
         BOT = json.load(f)
-        
+
 if os.path.exists(BOT_SET_JSON_FILE_USER):
     with open(BOT_SET_JSON_FILE_USER, "r", encoding="utf-8") as f:
         BOT_SET = json.load(f)
 else:
     with open(BOT_SET_JSON_FILE, "r", encoding="utf-8") as f:
         BOT_SET = json.load(f)
-        
-if BOT_SET.get("开启别名") and BOT_SET["开启别名"].lower() == "true":
-    ch_name = True
-else:
-    ch_name = False
-    
+
+ch_name = bool(BOT_SET.get("开启别名") and BOT_SET["开启别名"].lower() == "true")
 chat_id = int(BOT["user_id"])
 TOKEN = BOT["bot_token"]
 API_ID = BOT["api_id"]
@@ -69,7 +65,7 @@ elif PROXY_TYPE == "MTProxy":
     proxy = (BOT["proxy_add"], BOT["proxy_port"], BOT["proxy_secret"])
 else:
     proxy = (BOT["proxy_type"], BOT["proxy_add"], BOT["proxy_port"])
-    
+
 # 开启tg对话
 if PROXY_START and BOT.get("noretry") and BOT["noretry"]:
     jdbot = TelegramClient("bot", API_ID, API_HASH, connection=connectionType, proxy=proxy).start(bot_token=TOKEN)

@@ -54,7 +54,7 @@ async def block(event):
                 await jdbot.edit_message(msg, f"pin为{pt_pin}的账号先前已经被屏蔽，因此取消屏蔽！")
             else:
                 blocks.append(expired)
-                blocks = " ".join('%s' % _ for _ in sorted(blocks, reverse=False))
+                blocks = " ".join(f'{_}' for _ in sorted(blocks, reverse=False))
                 configs[line] = f'TempBlockCookie="{blocks}"\n'
                 rwcon(configs)
                 await jdbot.edit_message(msg, f"pin为{pt_pin}的账号屏蔽成功！")
@@ -87,7 +87,7 @@ async def block(event):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")

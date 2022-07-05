@@ -36,8 +36,7 @@ async def checkCookie(cookie):
         if data['retcode'] == "1001":
             return False
         else:
-            nickname = data['data']['userInfo']['baseInfo']['nickname']
-            return nickname
+            return data['data']['userInfo']['baseInfo']['nickname']
     except Exception as e:
         await jdbot.send_message(chat_id, f"此cookie无法完成检测，请自行斟酌！\n\n{cookie}\n\n错误：{e}")
         return True
@@ -138,7 +137,7 @@ async def mycheckcookie(event):
                     configs[line] = f"{Temp}program\n"
                     configs = ''.join(configs)
                     break
-            n = " ".join('%s' % expired for expired in expireds)
+            n = " ".join(f'{expired}' for expired in expireds)
             configs = re.sub(r'TempBlockCookie=".*"program', f'TempBlockCookie="{n}"', configs, re.M)
             text += f'【屏蔽情况】{o}TempBlockCookie="{n}"\n'
             write(configs)
@@ -151,45 +150,33 @@ async def mycheckcookie(event):
                 for expired in expireds:
                     if QL8:
                         url = 'http://127.0.0.1:5600/api/envs/disable'
-                        body = [f"{expired[0]}"]
-                        r = requests.put(url, json=body, headers=headers)
-                        if r.ok:
-                            text += f'账号{expired[1]}：{o}禁用成功，记得及时更新\n'
-                        else:
-                            text += f'账号{expired[1]}：{o}禁用失败，请手动禁用\n'
                     else:
                         url = 'http://127.0.0.1:5600/api/cookies/disable'
-                        body = [f"{expired[0]}"]
-                        r = requests.put(url, json=body, headers=headers)
-                        if r.ok:
-                            text += f'账号{expired[1]}：{o}禁用成功，记得及时更新\n'
-                        else:
-                            text += f'账号{expired[1]}：{o}禁用失败，请手动禁用\n'
+                    body = [f"{expired[0]}"]
+                    r = requests.put(url, json=body, headers=headers)
+                    if r.ok:
+                        text += f'账号{expired[1]}：{o}禁用成功，记得及时更新\n'
+                    else:
+                        text += f'账号{expired[1]}：{o}禁用失败，请手动禁用\n'
                 text += '\n'
             if valids:
                 text += f'【启用情况】\n'
                 for valid in valids:
                     if QL8:
                         url = 'http://127.0.0.1:5600/api/envs/enable'
-                        body = [f"{valid[0]}"]
-                        r = requests.put(url, json=body, headers=headers)
-                        if r.ok:
-                            text += f'账号{valid[2]} - {valid[1]}：{o}启用成功\n'
-                        else:
-                            text += f'账号{valid[2]} - {valid[1]}：{o}启用失败，请手动启用\n'
                     else:
                         url = 'http://127.0.0.1:5600/api/cookies/enable'
-                        body = [f"{valid[0]}"]
-                        r = requests.put(url, json=body, headers=headers)
-                        if r.ok:
-                            text += f'账号{valid[2]} - {valid[1]}：{o}启用成功\n'
-                        else:
-                            text += f'账号{valid[2]} - {valid[1]}：{o}启用失败，请手动启用\n'
+                    body = [f"{valid[0]}"]
+                    r = requests.put(url, json=body, headers=headers)
+                    if r.ok:
+                        text += f'账号{valid[2]} - {valid[1]}：{o}启用成功\n'
+                    else:
+                        text += f'账号{valid[2]} - {valid[1]}：{o}启用失败，请手动启用\n'
                 text += '\n'
             if changes:
                 text += f'【更新情况】\n'
+                url = 'http://127.0.0.1:5600/api/envs'
                 for change in changes:
-                    url = 'http://127.0.0.1:5600/api/envs'
                     body = {
                         "name": "JD_COOKIE",
                         "remarks": change[0],
@@ -208,7 +195,7 @@ async def mycheckcookie(event):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")

@@ -6,14 +6,17 @@ import random
 @jdbot.on(events.NewMessage())
 async def my_forward(event):
     try:
-        if BOT_SET['开启机器人转发'].lower() != 'false' and event.chat_id != chat_id and str(event.chat_id) not in BOT_SET[
-            '机器人黑名单']:
-            await jdbot.send_message(chat_id, f'您的机器人接收到消息。来自:```{event.chat_id}```')
-            await jdbot.forward_messages(chat_id, event.id, event.chat_id)
-        elif BOT_SET['开启机器人转发'].lower() != 'false' and str(event.chat_id) in BOT_SET['机器人黑名单']:
-            words = BOT_SET['机器人垃圾话'].split('|')
-            word = words[random.randint(0, len(words) - 1)]
-            await jdbot.send_message(event.chat_id, str(word))
+        if BOT_SET['开启机器人转发'].lower() != 'false':
+            if (
+                event.chat_id != chat_id
+                and str(event.chat_id) not in BOT_SET['机器人黑名单']
+            ):
+                await jdbot.send_message(chat_id, f'您的机器人接收到消息。来自:```{event.chat_id}```')
+                await jdbot.forward_messages(chat_id, event.id, event.chat_id)
+            elif str(event.chat_id) in BOT_SET['机器人黑名单']:
+                words = BOT_SET['机器人垃圾话'].split('|')
+                word = words[random.randint(0, len(words) - 1)]
+                await jdbot.send_message(event.chat_id, str(word))
     except Exception as e:
         await jdbot.send_message(chat_id, str(e))
 

@@ -116,16 +116,14 @@ async def edit_file(conv, SENDER, path, msg, page, filelist):
                 page = len(markup) - 1
             return path, msg, page, markup
         elif res == 'updir':
-            path = '/'.join(path.split('/')[:-1])
-            if path == '':
-                path = JD_DIR
+            path = '/'.join(path.split('/')[:-1]) or JD_DIR
             return path, msg, page, None
         elif res == 'edit':
             await jdbot.send_message(chat_id, '请复制并修改以下内容，修改完成后发回机器人，2分钟内有效\n发送`cancel`或`取消`取消对话')
             await jdbot.delete_messages(chat_id, msg)
             msg = await conv.send_message(f'`{"".join(newmarkup)}`')
             resp = await conv.get_response()
-            if resp.raw_text == 'cancel' or resp.raw_text == '取消':
+            if resp.raw_text in ['cancel', '取消']:
                 await jdbot.delete_messages(chat_id, msg)
                 await jdbot.send_message(chat_id, '对话已取消')
                 conv.cancel()

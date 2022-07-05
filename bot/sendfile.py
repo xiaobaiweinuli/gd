@@ -26,10 +26,7 @@ async def bot_getfile(event):
     path = JD_DIR
     page = 0
     msg_text = event.raw_text.split(' ')
-    if len(msg_text) == 2:
-        text = msg_text[-1]
-    else:
-        text = None
+    text = msg_text[-1] if len(msg_text) == 2 else None
     if text and os.path.isfile(text):
         await jdbot.send_message(chat_id, '请查收文件', file=text)
         return

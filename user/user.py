@@ -38,15 +38,12 @@ patternStr = ''
 envNum = len(envNameList)
 for i in range(envNum):
     if i == envNum-1:
-        patternStr += envNameList[i] + "|jd_redrain_url|jd_redrain_half_url|zjdbody"
+        patternStr += f"{envNameList[i]}|jd_redrain_url|jd_redrain_half_url|zjdbody"
     else:
-        patternStr += envNameList[i] + "|"
+        patternStr += f"{envNameList[i]}|"
 
 # 开启随机延时
-if isNow:
-    yanshi = ''
-else:
-    yanshi = 'now'
+yanshi = '' if isNow else 'now'
 
 def readDL(lable, dl=dlDict):
     if lable:
@@ -65,8 +62,7 @@ async def funCX(name, scriptPath, msg, group, lable=1):
     try:
         cxjc = f'ps -ef | egrep -v "tail|timeout|grep" | grep {os.path.basename(scriptPath)} | egrep "python|node"'
         result = os.popen(cxjc)
-        r = result.readlines()
-        if r:
+        if r := result.readlines():
             a = random.randint(60, 180) #队列检测休眠时间
             msg = await jdbot.edit_message(msg, f"【队列】{group} 的 `[{name}]` 变量当前已在跑，已加入队列等待。本次等待`{a}`秒后再次尝试。可发送【`监控明细`】查询队列情况。")
             if lable < 21:
@@ -93,14 +89,8 @@ async def funCXDL():
         jcDict[n] = len(r)
     dlmsg = ''
     for i in jcDict:
-        if jcDict[i] > 0:
-            jcNum = f'`{jcDict[i]}`'
-        else:
-            jcNum = jcDict[i]
-        if dl[i] > 0:
-            dlNum = f'`{dl[i]}`'
-        else:
-            dlNum = dl[i]
+        jcNum = f'`{jcDict[i]}`' if jcDict[i] > 0 else jcDict[i]
+        dlNum = f'`{dl[i]}`' if dl[i] > 0 else dl[i]
         dlmsg += f"当前:{jcNum} | 队列:{dlNum}\t【{i}】\n"
     if isNow:
         dlmsg += f"\n是否队列等待:`已开启`\n"
@@ -110,12 +100,8 @@ async def funCXDL():
 
 # 增加再进入队列之前判断重复变量
 async def isduilie(kv):
-    lable = False
     dl = readDL(False)
-    for i in dl['v']:
-        if kv == i:
-            lable = True
-            break
+    lable = any(kv == i for i in dl['v'])
     if not lable:
         dl = readDL(False)
         dl['v'].append(kv)
@@ -134,7 +120,7 @@ async def user(event):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")
@@ -149,13 +135,13 @@ async def user_mx(event):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")
 
 pat = '(.|\\n)*export\s(%s).*=(".*"|\'.*\')' % patternStr
-@client.on(events.NewMessage(chats=myzdjr_chatIds, pattern=r'%s' % pat))
+@client.on(events.NewMessage(chats=myzdjr_chatIds, pattern=f'{pat}'))
 async def activityID(event):
     try:
         text = event.message.text
@@ -215,21 +201,24 @@ async def activityID(event):
                     await asyncio.sleep(a)
                 configs = re.sub(f'{key}=("|\').*("|\').*', kv, configs)
                 change += f"【替换】{group} 发出的 `[{name}]` 环境变量成功\n`{kv}`\n\n"
-                msg = await jdbot.edit_message(msg, change)
             else:
                 if V4:
-                    end_line = 0
                     configs = rwcon("list")
-                    for config in configs:
-                        if "第五区域" in config and "↑" in config:
-                            end_line = configs.index(config) - 1
-                            break
+                    end_line = next(
+                        (
+                            configs.index(config) - 1
+                            for config in configs
+                            if "第五区域" in config and "↑" in config
+                        ),
+                        0,
+                    )
+
                     configs.insert(end_line, f'export {key}="{value}"\n')
                 else:
                     configs = rwcon("str")
                     configs += f'export {key}="{value}"\n'
                 change += f"【新增】{group} 发出的 `[{name}]` 环境变量成功\n`{kv}`\n\n"
-                msg = await jdbot.edit_message(msg, change)
+            msg = await jdbot.edit_message(msg, change)
             rwcon(configs)
         if len(change) == 0:
             await jdbot.edit_message(msg, f"【取消】{group} 发出的 `[{name}]` 变量无需改动！")
@@ -271,13 +260,13 @@ async def activityID(event):
                     await jdbot.delete_messages(chat_id, msg)
                     break
             if not lable:
-                await jdbot.edit_message(msg, f"看到这行字,是有严重BUG!")
+                await jdbot.edit_message(msg, "看到这行字,是有严重BUG!")
         except ImportError:
             pass
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")

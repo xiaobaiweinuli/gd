@@ -19,10 +19,7 @@ async def myaddwskey(event):
         text = ""
         msg = await jdbot.send_message(chat_id, "获取到wskey，正在工作中……")
         messages = event.raw_text.split("\n")
-        if V4:
-            file = f"{CONFIG_DIR}/wskey.list"
-        else:
-            file = "/ql/db/wskey.list"
+        file = f"{CONFIG_DIR}/wskey.list" if V4 else "/ql/db/wskey.list"
         if not os.path.exists(file):
             if V4 or QL2:
                 configs = read("str")
@@ -75,7 +72,7 @@ async def myaddwskey(event):
                 message = pin + key + ";"
                 pt_pin = re.findall(r'pin=(.*);', pin)[0]
                 configs = wskey("str")
-                if pin + "wskey" in configs:
+                if f"{pin}wskey" in configs:
                     configs = re.sub(f"{pin}wskey=.*;", message, configs)
                     text += f"更新wskey成功！pin为：{pt_pin}\n"
                 else:
@@ -90,7 +87,7 @@ async def myaddwskey(event):
                 message = pin + key + ";"
                 pt_pin = re.findall(r'pin=(.*);', pin)[0]
                 configs = read("str")
-                if pin + "wskey" in configs:
+                if f"{pin}wskey" in configs:
                     configs = re.sub(f'{pin}wskey=.*;', message, configs)
                     text += f"更新wskey成功！pin为：{pt_pin}\n"
                 elif V4 and f"pt_pin={pt_pin}" in configs:
@@ -105,7 +102,7 @@ async def myaddwskey(event):
                         elif "第二区域" in config:
                             await jdbot.send_message(chat_id, "请使用标准模板！")
                             return
-                elif V4 and f"pt_pin={pt_pin}" not in configs:
+                elif V4:
                     configs, line, num = read("list"), 0, 0
                     for config in configs:
                         if "pt_pin" in config and "##" not in config:
@@ -131,9 +128,10 @@ async def myaddwskey(event):
                 pin, key = ws[0], ws[1]
                 message = pin + key + ";"
                 pt_pin = re.findall(r'pin=(.*);', pin)[0]
-                body = {'searchValue': pin + "wskey="}
-                data = get(url, headers=headers, params=body).json()['data']
-                if data:
+                body = {'searchValue': f"{pin}wskey="}
+                if data := get(url, headers=headers, params=body).json()[
+                    'data'
+                ]:
                     try:
                         body = {"value": message, "name": "JD_WSCK", "_id": data[0]['_id']}
                     except KeyError:
@@ -171,7 +169,7 @@ async def myaddwskey(event):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")

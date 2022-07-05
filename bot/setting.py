@@ -17,8 +17,8 @@ async def bot_set(event):
             if '命令别名' in i:
                 continue
             else:
-                info = info + f'\t\t- {i}-->{myset[i]} \n'
-        info = info + '请点击您要设置的项目，选择后，输入要设置的值，重启生效,垃圾话以 | 进行区隔,黑名单以空格或逗号或顿号区隔'
+                info = f'{info}\t\t- {i}-->{myset[i]} \n'
+        info = f'{info}请点击您要设置的项目，选择后，输入要设置的值，重启生效,垃圾话以 | 进行区隔,黑名单以空格或逗号或顿号区隔'
         btn = [Button.inline(i, i) for i in myset if not isinstance(myset[i],dict)]
         btn.append(Button.inline('取消', data='cancel'))
         btn = split_list(btn, 3)
@@ -33,7 +33,7 @@ async def bot_set(event):
                 await jdbot.delete_messages(chat_id, msg)
                 msg = await conv.send_message(f'请输入您要修改的{res}\n如果需要取消，请输入`cancel`或`取消`\n如需自定义或快速修改，请直接修改config/botset.json\n如果为True或False首字符大写\n```{myset[res]}```')
                 data = await conv.get_response()
-                if data.raw_text == 'cancel' or data.raw_text == '取消':
+                if data.raw_text in ['cancel', '取消']:
                     await jdbot.delete_messages(chat_id,msg)
                     await jdbot.send_message(chat_id, '对话已取消')
                     conv.cancel()
@@ -70,7 +70,7 @@ async def bot_setname(event):
             myset = json.load(f)
         info = '您目前命令别名设置如下：\n'
         for i in myset['命令别名']:
-            info = info + f'\t\t- {i}-->{myset["命令别名"][i]} \n'
+            info = f'{info}\t\t- {i}-->{myset["命令别名"][i]} \n'
         info = info + '请点击您要设置的项目，选择后，输入要设置的值，重启生效\n**请注意尽量不要重复，否则可能发生未知错误**'
         btn = [Button.inline(i, i) for i in myset['命令别名']]
         btn.append(Button.inline('取消', data='cancel'))
@@ -86,7 +86,7 @@ async def bot_setname(event):
                 await jdbot.delete_messages(chat_id, msg)
                 msg = await conv.send_message(f'请输入您要修改的{res}\n如果需要取消，请输入`cancel`或`取消`\n如需自定义或快速修改，请直接修改config/botset.json\n如果为True或False首字符大写\n```{myset["命令别名"][res]}```')
                 data = await conv.get_response()
-                if data.raw_text == 'cancel' or data.raw_text == '取消':
+                if data.raw_text in ['cancel', '取消']:
                     await jdbot.delete_messages(chat_id,msg)
                     msg = await jdbot.send_message(chat_id, '对话已取消')
                     conv.cancel()
