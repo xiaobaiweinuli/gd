@@ -45,7 +45,7 @@ async def myaddexport(event):
                 end = "替换环境变量成功"
             else:
                 async with jdbot.conversation(SENDER, timeout=60) as conv:
-                    msg = await jdbot.edit_message(msg, f"这个环境变量是新增的，需要给他添加注释嘛？", buttons=btns)
+                    msg = await jdbot.edit_message(msg, "这个环境变量是新增的，需要给他添加注释嘛？", buttons=btns)
                     convdata = await conv.wait_event(press_event(SENDER))
                     res = bytes.decode(convdata.data)
                     if res == 'cancel':
@@ -77,7 +77,7 @@ async def myaddexport(event):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")

@@ -68,10 +68,9 @@ async def my_cron(event):
                         return
                     if QL:
                         cron_info = '名称：\n\t{name}\n任务：\n\t{command}\n定时：\n\t{schedule}\n是否已禁用：\n\t{isDisabled}\n\t0--表示启用，1--表示禁用'.format(**res['data'][int(resp)])
-                        markup = [Button.inline(i['name'], data=i['data']) for i in buttons]
                     else:
                         cron_info = f'{resp}'
-                        markup = [Button.inline(i['name'], data=i['data']) for i in buttons]
+                    markup = [Button.inline(i['name'], data=i['data']) for i in buttons]
                     markup = split_list(markup, int(BOT_SET['每页列数']))
                     msg = await jdbot.edit_message(msg, cron_info, buttons=markup)
                     conv_data = await conv.wait_event(press_event(SENDER))
@@ -99,10 +98,7 @@ async def my_cron(event):
                             cronres = cron_manage('edit', f'{resp}-->{respones}\n', auth['token'])
                     else:
                         go_up = False
-                        if QL:
-                            crondata = res['data'][int(resp)]
-                        else:
-                            crondata = resp
+                        crondata = res['data'][int(resp)] if QL else resp
                         cronres = cron_manage(
                             btnres, crondata, auth['token'])
                     if cronres['code'] == 200:
@@ -111,7 +107,7 @@ async def my_cron(event):
                         await jdbot.delete_messages(chat_id, msg)
                         if len(cronres['data']) <= 4000:
                             msg = await jdbot.send_message(chat_id, f"指令发送成功，结果如下：\n{cronres['data']}")
-                        elif len(cronres['data']) > 4000:
+                        else:
                             _log = f'{LOG_DIR}/bot/qlcron.log'
                             with open(_log, 'w+', encoding='utf-8') as f:
                                 f.write(cronres['data'])
@@ -125,7 +121,7 @@ async def my_cron(event):
         logger.info(f'执行{event.raw_text}命令完毕')
     except exceptions.TimeoutError:
         await jdbot.edit_message(msg, '选择已超时，对话已停止')
-        logger.error(f'选择已超时，对话已停止')
+        logger.error('选择已超时，对话已停止')
     except Exception as e:
         await jdbot.edit_message(msg, f'something wrong,I\'m sorry\n{str(e)}')
         logger.error(f'something wrong,I\'m sorry\n{str(e)}')
@@ -135,7 +131,7 @@ async def my_cron(event):
 async def my_addcron(event):
     try:
         SENDER = event.sender_id
-        msg = await jdbot.send_message(chat_id, f'请稍后，正在查询')
+        msg = await jdbot.send_message(chat_id, '请稍后，正在查询')
         if QL:
             with open(AUTH_FILE, 'r', encoding='utf-8') as f:
                 auth = json.load(f)
@@ -163,10 +159,9 @@ async def my_addcron(event):
                         'command': (resp.raw_text.split('-->'))[1],
                         'schedule': (resp.raw_text.split('-->'))[2]
                     }
-                    res = cron_manage('add', crondata, auth['token'])
                 else:
                     crondata = resp.raw_text
-                    res = cron_manage('add', crondata, auth['token'])
+                res = cron_manage('add', crondata, auth['token'])
                 if res['code'] == 200:
                     await jdbot.delete_messages(chat_id, msg)
                     msg = await jdbot.send_message(chat_id, '已成功添加定时任务')

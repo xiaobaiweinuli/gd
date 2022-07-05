@@ -23,11 +23,10 @@ async def my_a(event):
             res = bytes.decode(convdata.data)
             if res == 'cancel':
                 msg = await jdbot.edit_message(msg, '对话已取消')
-                conv.cancel()
             else:
                 await jdbot.delete_messages(chat_id, msg)
                 cmdtext = res
-                conv.cancel()
+            conv.cancel()
         if cmdtext:
             await cmd(cmdtext.replace('nohup ', ''))
     except exceptions.TimeoutError:

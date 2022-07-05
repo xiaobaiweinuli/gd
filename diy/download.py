@@ -35,10 +35,7 @@ async def mydownload(event):
             fname_cn = ''
             if furl.endswith(".js"):
                 fname_cn = re.findall(r"(?<=new\sEnv\(').*(?=')", resp, re.M)
-                if fname_cn != []:
-                    fname_cn = fname_cn[0]
-                else:
-                    fname_cn = ''
+                fname_cn = fname_cn[0] if fname_cn != [] else ''
             if V4:
                 btns = [Button.inline('放入config目录', data=CONFIG_DIR), Button.inline('放入jbot/diy目录', data=f'{BOT_DIR}/diy'), Button.inline('放入scripts目录', data=SCRIPTS_DIR), Button.inline('放入own目录', data=OWN_DIR ), Button.inline('取消对话', data='cancel')]
             else:
@@ -59,7 +56,7 @@ async def mydownload(event):
                 res2 = bytes.decode(convdata.data)
                 if res2 == "confirm":
                     cmdtext = f'{cmd} {SCRIPTS_DIR}/{fname} now'
-                msg = await jdbot.edit_message(msg, f"请问需要添加定时吗？", buttons=btns)
+                msg = await jdbot.edit_message(msg, "请问需要添加定时吗？", buttons=btns)
                 convdata = await conv.wait_event(press_event(SENDER))
                 res2 = bytes.decode(convdata.data)
                 if res2 == 'cancel':
@@ -101,7 +98,7 @@ async def mydownload(event):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")

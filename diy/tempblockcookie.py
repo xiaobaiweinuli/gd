@@ -27,10 +27,7 @@ async def mytempblockcookie(event):
         goon = True
         if len(ck_num) <= 1:
             while goon:
-                if V4:
-                    goon = await v4_block(sender)
-                else:
-                    goon = await ql_block(sender)
+                goon = await v4_block(sender) if V4 else await ql_block(sender)
         elif ck_num.replace(" ", "").isdigit():
             if V4:
                 await v4_appoint(ck_num.replace(" ", ""))
@@ -81,7 +78,8 @@ async def v4_block(sender):
                         await jdbot.edit_message(msg, "无法找到 TempBlockCookie 目标字符串，请检查是否使用了标准配置模板")
                         return False
                 if res == 'inquire':
-                    message = f"目前的屏蔽情况是：\n{str(' '.join('%s' % _ for _ in sorted(blocks, reverse=False))) if len(blocks) != 0 else '没有帐号被屏蔽'}"
+                    message = f"目前的屏蔽情况是：\n{' '.join(f'{_}' for _ in sorted(blocks, reverse=False)) if len(blocks) != 0 else '没有帐号被屏蔽'}"
+
                     return await operate(conv, sender, msg, message)
                 elif res == 'designated block':
                     acounts = len(get_cks(CONFIG_SH_FILE))
@@ -89,10 +87,8 @@ async def v4_block(sender):
                         message = "所有账号都已被屏蔽，无需继续屏蔽"
                         return await operate(conv, sender, msg, message)
                     cks, btns = [], []
-                    for i in range(acounts):
-                        cks.append(i + 1)
-                    btns_list = list(set(cks) - set(blocks))
-                    btns_list.sort()
+                    cks.extend(i + 1 for i in range(acounts))
+                    btns_list = sorted(set(cks) - set(blocks))
                     for block in btns_list:
                         btn = Button.inline(f"账号{str(block)}", data=block)
                         btns.append(btn)
@@ -109,7 +105,7 @@ async def v4_block(sender):
                         return False
                     else:
                         blocks.append(int(res_2))
-                        blocks = " ".join('%s' % _ for _ in sorted(blocks, reverse=False))
+                        blocks = " ".join(f'{_}' for _ in sorted(blocks, reverse=False))
                         configs[line] = f'TempBlockCookie="{blocks}"\n'
                         with open(CONFIG_SH_FILE, 'w', encoding='utf-8') as f2:
                             f2.write(''.join(configs))
@@ -123,8 +119,13 @@ async def v4_block(sender):
                     for block in blocks:
                         btn = Button.inline(f"账号{str(block)}", data=block)
                         btns.append(btn)
-                    btns.append(Button.inline("上级菜单", data="upper menu"))
-                    btns.append(Button.inline('取消会话', data='cancel'))
+                    btns.extend(
+                        (
+                            Button.inline("上级菜单", data="upper menu"),
+                            Button.inline('取消会话', data='cancel'),
+                        )
+                    )
+
                     msg = await jdbot.edit_message(msg, '请做出您的选择：', buttons=split_list(btns, row))
                     convdata = await conv.wait_event(press_event(sender))
                     res_2 = bytes.decode(convdata.data)
@@ -136,7 +137,7 @@ async def v4_block(sender):
                         return False
                     else:
                         blocks.remove(int(res_2))
-                        blocks = " ".join('%s' % _ for _ in sorted(blocks, reverse=False))
+                        blocks = " ".join(f'{_}' for _ in sorted(blocks, reverse=False))
                         configs[line] = f'TempBlockCookie="{blocks}"\n'
                         with open(CONFIG_SH_FILE, 'w', encoding='utf-8') as f2:
                             f2.write(''.join(configs))
@@ -153,7 +154,7 @@ async def v4_block(sender):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")

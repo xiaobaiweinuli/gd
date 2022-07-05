@@ -53,10 +53,10 @@ def creat_chart(xdata, title, bardata, bardata2, linedate):
                         "rgb(75, 192, 192)",
                         "rgb(54, 162, 235)",
                         "rgb(153, 102, 255)",
-                        "rgb(255, 99, 132)"
+                        "rgb(255, 99, 132)",
                     ],
                     "yAxisID": "y1",
-                    "data": bardata
+                    "data": bardata,
                 },
                 {
                     "label": "OUT",
@@ -67,10 +67,10 @@ def creat_chart(xdata, title, bardata, bardata2, linedate):
                         "rgb(75, 192, 192)",
                         "rgb(54, 162, 235)",
                         "rgb(153, 102, 255)",
-                        "rgb(255, 99, 132)"
+                        "rgb(255, 99, 132)",
                     ],
                     "yAxisID": "y1",
-                    "data": bardata2
+                    "data": bardata2,
                 },
                 {
                     "label": "TOTAL",
@@ -78,9 +78,9 @@ def creat_chart(xdata, title, bardata, bardata2, linedate):
                     "fill": False,
                     "backgroundColor": "rgb(201, 203, 207)",
                     "yAxisID": "y2",
-                    "data": linedate
-                }
-            ]
+                    "data": linedate,
+                },
+            ],
         },
         "options": {
             "plugins": {
@@ -90,7 +90,7 @@ def creat_chart(xdata, title, bardata, bardata2, linedate):
                     "color": '#666',
                     "font": {
                         "size": 20,
-                    }
+                    },
                 },
             },
             "legend": {
@@ -105,11 +105,13 @@ def creat_chart(xdata, title, bardata, bardata2, linedate):
                 "fontSize": 24,
             },
             "scales": {
-                "xAxes": [{
-                    "ticks": {
-                        "fontSize": 24,
+                "xAxes": [
+                    {
+                        "ticks": {
+                            "fontSize": 24,
+                        }
                     }
-                }],
+                ],
                 "yAxes": [
                     {
                         "id": "y1",
@@ -117,25 +119,31 @@ def creat_chart(xdata, title, bardata, bardata2, linedate):
                         "display": False,
                         "position": "left",
                         "ticks": {
-                            "max": int(int(max([max(bardata), max(bardata2)])+100)*2)
+                            "max": int(
+                                int(max([max(bardata), max(bardata2)]) + 100)
+                                * 2
+                            )
                         },
                         "scaleLabel": {
                             "fontSize": 20,
                             "fontStyle": 'bold',
-                        }
+                        },
                     },
                     {
                         "id": "y2",
                         "type": "linear",
                         "display": False,
                         "ticks": {
-                            "min": int(min(linedate)*2-(max(linedate))-100),
-                            "max": int(int(max(linedate)))
+                            "min": int(
+                                min(linedate) * 2 - (max(linedate)) - 100
+                            ),
+                            "max": int(max(linedate)),
                         },
-                        "position": "right"
-                    }
-                ]
-            }
-        }
+                        "position": "right",
+                    },
+                ],
+            },
+        },
     }
+
     qc.to_file(BEAN_IMG)

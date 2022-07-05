@@ -23,7 +23,7 @@ class QuickChartFunction:
 
 def serialize(obj):
     if isinstance(obj, QuickChartFunction):
-        return '__BEGINFUNCTION__' + obj.script + '__ENDFUNCTION__'
+        return f'__BEGINFUNCTION__{obj.script}__ENDFUNCTION__'
     if isinstance(obj, (datetime.date, datetime.datetime)):
         return obj.isoformat()
     return obj.__dict__
@@ -52,7 +52,7 @@ class QuickChart:
         return self.config is not None
 
     def get_url_base(self):
-        return '%s://%s' % (self.scheme, self.host)
+        return f'{self.scheme}://{self.host}'
 
     def get_url(self):
         if not self.is_valid():
@@ -68,7 +68,7 @@ class QuickChart:
         }
         if self.key:
             params['key'] = self.key
-        return '%s/chart?%s' % (self.get_url_base(), urlencode(params))
+        return f'{self.get_url_base()}/chart?{urlencode(params)}'
 
     def _post(self, url):
         try:
@@ -93,7 +93,7 @@ class QuickChart:
         return resp
 
     def get_short_url(self):
-        resp = self._post('%s/chart/create' % self.get_url_base())
+        resp = self._post(f'{self.get_url_base()}/chart/create')
         parsed = json.loads(resp.text)
         if not parsed['success']:
             raise RuntimeError(
@@ -101,7 +101,7 @@ class QuickChart:
         return parsed['url']
 
     def get_bytes(self):
-        resp = self._post('%s/chart' % self.get_url_base())
+        resp = self._post(f'{self.get_url_base()}/chart')
         return resp.content
 
     def to_file(self, path):

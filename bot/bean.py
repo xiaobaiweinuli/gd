@@ -83,8 +83,7 @@ def creat_bean_counts(csv_file):
     tb = PrettyTable()
     num = len(data[-1].split(',')) - 1
     title = ['DATE']
-    for i in range(0, num):
-        title.append('COUNT'+str(i+1))
+    title.extend(f'COUNT{str(i+1)}' for i in range(num))
     tb.field_names = title
     data = data[-7:]
     for line in data:
@@ -93,7 +92,7 @@ def creat_bean_counts(csv_file):
             row = row[:len(title)]
         elif len(row) < len(title):
             i = len(title) - len(row)
-            for _ in range(0, i):
+            for _ in range(i):
                 row.append(str(0))
         tb.add_row(row)
     length = 172 + 100 * num

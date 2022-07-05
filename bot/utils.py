@@ -45,7 +45,7 @@ def Ver_Main(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         res = func(*args, **kwargs)
-        if str(res).find("valid sign") > -1:
+        if "valid sign" in str(res):
             msg = ql_login()
             return {"code": 400, "data": msg}
         return res
@@ -64,7 +64,7 @@ def ql_login():
         elif res["message"].find("两步验证") > -1:
             return " 当前登录已过期，且已开启两步登录验证，请使用命令/auth 六位验证码完成登录"
     except Exception as e:
-        return "自动登录出错：" + str(e)
+        return f"自动登录出错：{str(e)}"
 
 
 def get_cks(ckfile):
@@ -95,10 +95,7 @@ def split_list(datas, n, row: bool = True):
     _datas = []
     if not row:
         size, n = n, size
-    for i in range(int(size)):
-        start = int(i * n)
-        end = int((i + 1) * n)
-        _datas.append(datas[start:end])
+    _datas.extend(datas[int(i * n):int((i + 1) * n)] for i in range(int(size)))
     return _datas
 
 
@@ -134,7 +131,7 @@ async def cmd(cmdtext):
         elif len(res) <= 4000:
             await jdbot.delete_messages(chat_id, msg)
             await jdbot.send_message(chat_id, res)
-        elif len(res) > 4000:
+        else:
             tmp_log = f'{LOG_DIR}/bot/{cmdtext.split("/")[-1].split(".js")[0]}-{datetime.datetime.now().strftime("%H-%M-%S")}.log'
             with open(tmp_log, "w+", encoding="utf-8") as f:
                 f.write(res)
@@ -243,9 +240,7 @@ async def log_btn(conv, sender, path, msg, page, files_list):
                 page = len(markup) - 1
             return path, msg, page, markup
         elif res == "updir":
-            path = "/".join(path.split("/")[:-1])
-            if path == '':
-                path = JD_DIR
+            path = "/".join(path.split("/")[:-1]) or JD_DIR
             return path, msg, page, None
         elif os.path.isfile(f"{path}/{res}"):
             msg = await jdbot.edit_message(msg, "文件发送中，请注意查收")
@@ -320,9 +315,7 @@ async def snode_btn(conv, sender, path, msg, page, files_list):
                 page = len(markup) - 1
             return path, msg, page, markup
         elif res == "updir":
-            path = "/".join(path.split("/")[:-1])
-            if path == '':
-                path = JD_DIR
+            path = "/".join(path.split("/")[:-1]) or JD_DIR
             return path, msg, page, None
         elif os.path.isfile(f"{path}/{res}"):
             conv.cancel()
@@ -375,8 +368,9 @@ async def add_cron(jdbot, conv, resp, filename, msg, sender, markup, path):
             crondata = {
                 "name": f'{filename.split(".")[0]}',
                 "command": f"task {path}/{filename}",
-                "schedule": f"0 0 * * *"
+                "schedule": "0 0 * * *",
             }
+
         else:
             crondata = f"0 0 * * * mtask {path}/{filename}"
         msg = await jdbot.edit_message(msg, f"未识别到定时，默认定时\n```{crondata}```\n是否需要修改", buttons=markup)
@@ -386,7 +380,7 @@ async def add_cron(jdbot, conv, resp, filename, msg, sender, markup, path):
         convmsg = await conv.send_message(f"```{crondata}```\n请输入您要修改内容，可以直接点击上方定时进行复制修改\n如果需要取消，请输入`cancel`或`取消`")
         crondata = await conv.get_response()
         crondata = crondata.raw_text
-        if crondata == "cancel" or crondata == "取消":
+        if crondata in ["cancel", "取消"]:
             conv.cancel()
             await jdbot.send_message(chat_id, "对话已取消")
             return
@@ -442,12 +436,10 @@ def cron_manage_QL(fun, crondata, token):
             res = requests.put(url, json=data, headers=headers).json()
         elif fun == "disable":
             data = [crondata["_id"]]
-            res = requests.put(url + "/disable", json=data,
-                               headers=headers).json()
+            res = requests.put(f"{url}/disable", json=data, headers=headers).json()
         elif fun == "enable":
             data = [crondata["_id"]]
-            res = requests.put(url + "/enable", json=data,
-                               headers=headers).json()
+            res = requests.put(f"{url}/enable", json=data, headers=headers).json()
         elif fun == "del":
             data = [crondata["_id"]]
             res = requests.delete(url, json=data, headers=headers).json()
@@ -511,11 +503,11 @@ def cron_manage_V4(fun, crondata):
 
 
 def cron_manage(fun, crondata, token):
-    if QL:
-        res = cron_manage_QL(fun, crondata, token)
-    else:
-        res = cron_manage_V4(fun, crondata)
-    return res
+    return (
+        cron_manage_QL(fun, crondata, token)
+        if QL
+        else cron_manage_V4(fun, crondata)
+    )
 
 
 @Ver_Main
@@ -548,12 +540,10 @@ def env_manage_QL(fun, envdata, token):
             res = requests.put(url, json=data, headers=headers).json()
         elif fun == "disable":
             data = [envdata["_id"]]
-            res = requests.put(url + "/disable", json=data,
-                               headers=headers).json()
+            res = requests.put(f"{url}/disable", json=data, headers=headers).json()
         elif fun == "enable":
             data = [envdata["_id"]]
-            res = requests.put(url + "/enable", json=data,
-                               headers=headers).json()
+            res = requests.put(f"{url}/enable", json=data, headers=headers).json()
         elif fun == "del":
             data = [envdata["_id"]]
             res = requests.delete(url, json=data, headers=headers).json()

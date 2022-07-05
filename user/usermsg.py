@@ -8,7 +8,7 @@ async def check_id(event):
     message = await event.get_reply_message()
     text = f"此消息ID：`{str(event.message.id)}`\n\n"
     text += f"**群组信息**\nid:`{str(event.chat_id)}\n`"
-    msg_from = event.chat if event.chat else (await event.get_chat())
+    msg_from = event.chat or await event.get_chat()
     if event.is_group or event.is_channel:
         text += f"群组名称：`{msg_from.title}`\n"
         try:

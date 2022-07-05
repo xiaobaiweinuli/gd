@@ -22,7 +22,7 @@ my_chat_id = int(diybotset['my_chat_id'])
 def myids(values, test_id):
     if "," in values:
         ids = values.replace(" ", "").split(",")
-        ids = list(map(int, ['%s' % int(_) for _ in ids]))
+        ids = list(map(int, [f'{int(_)}' for _ in ids]))
     else:
         ids = [int(values)]
     ids.append(int(test_id))
@@ -71,10 +71,7 @@ def checkCookie2(cookie):
     }
     try:
         r = requests.get(url, headers=headers).json()
-        if r['retcode'] == '1001':
-            return True
-        else:
-            return False
+        return r['retcode'] == '1001'
     except:
         return False
 
@@ -121,10 +118,7 @@ def rwcon(arg):
 
 # 读写wskey.list
 def wskey(arg):
-    if V4:
-        file = f"{CONFIG_DIR}/wskey.list"
-    else:
-        file = "/ql/db/wskey.list"
+    file = f"{CONFIG_DIR}/wskey.list" if V4 else "/ql/db/wskey.list"
     if arg == "str":
         with open(file, 'r', encoding='utf-8') as f1:
             wskey = f1.read()
@@ -181,10 +175,7 @@ def getbean(i, cookie, url):
         else:
             result = f"{o}Cookie 可能已经过期"
     except Exception as e:
-        if str(e).find('(char 0)') != -1:
-            result = f"{o}无法解析数据包"
-        else:
-            result = f"{o}访问发生错误：{e}"
+        result = f"{o}无法解析数据包" if '(char 0)' in str(e) else f"{o}访问发生错误：{e}"
     return f"\n账号{str(i).zfill(2)}{result}"
 
 
@@ -257,8 +248,7 @@ def getvenderId(token):
         "User-Agent": "Mozilla/5.0 (Linux; U; Android 10; zh-cn; MI 8 Build/QKQ1.190828.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/79.0.3945.147 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.5.40"
     }
     res = requests.post(url, headers=headers).json()
-    venderId = res['data']['venderId']
-    return venderId
+    return res['data']['venderId']
 
 
 def getvenderName(venderId):
@@ -315,9 +305,10 @@ def getsignday(token, venderId, activityId, cookie):
         "accept-encoding": "gzip, deflate, br",
         "accept-language": "zh-CN,zh;q=0.9",
         "cookie": cookie,
-        "referer": f"https://h5.m.jd.com",
-        "User-Agent": "Mozilla/5.0 (Linux; U; Android 10; zh-cn; MI 8 Build/QKQ1.190828.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/79.0.3945.147 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.5.40"
+        "referer": "https://h5.m.jd.com",
+        "User-Agent": "Mozilla/5.0 (Linux; U; Android 10; zh-cn; MI 8 Build/QKQ1.190828.002) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/79.0.3945.147 Mobile Safari/537.36 XiaoMi/MiuiBrowser/13.5.40",
     }
+
     res = requests.post(url, headers=headers).json()
     day = res['data']['days']
     dayinfo = f'  └已签到：{day}天。\n'
@@ -340,8 +331,7 @@ def signCollectGift(token, activityId, cookie):
     }
     res = requests.post(url, headers=headers).json()
     info = res['msg']
-    signinfo = f'  └{info}\n'
-    return signinfo
+    return f'  └{info}\n'
 
 
 # 修改原作者的 cronup() 函数便于我继续进行此功能的编写

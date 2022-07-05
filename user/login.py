@@ -10,10 +10,7 @@ from ..bot.utils import press_event, V4, row, split_list
 # 兼容青龙新版目录
 try:
     qlver = os.environ['QL_BRANCH']
-    if qlver >= 'v2.12.0':
-        QLMain='/ql/data'
-    else:
-        QLMain = '/ql'
+    QLMain = '/ql/data' if qlver >= 'v2.12.0' else '/ql'
 except:
     QLMain = '/ql'
 
@@ -74,10 +71,7 @@ def state():
     file = "/jd/config/botset.json" if V4 else f"{QLMain}/config/botset.json"
     with open(file, "r", encoding="utf-8") as f1:
         botset = f1.read()
-    if 'user": "True"' in botset:
-        return True
-    else:
-        return False
+    return 'user": "True"' in botset
     
 
 @jdbot.on(events.NewMessage(from_users=chat_id, pattern=r'^/user$'))

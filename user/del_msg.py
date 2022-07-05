@@ -9,10 +9,7 @@ from .login import user
 async def del_msg(event):
     try:
         num = event.raw_text.split(' ')
-        if isinstance(num, list) and len(num) == 2:
-            count = int(num[-1])
-        else:
-            count = 10
+        count = int(num[-1]) if isinstance(num, list) and len(num) == 2 else 10
         await event.delete()
         count_buffer = 0
         async for message in user.iter_messages(event.chat_id, from_user="me"):

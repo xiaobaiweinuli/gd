@@ -23,11 +23,12 @@ async def mychangeexport(event):
         knames, vnames, notes, btns = [], [], [], []
         if V4:
             for config in configs:
-                if "第五区域" in config and "↓" in config:
-                    start_line = configs.index(config) + 1
-                elif "第五区域" in config and "↑" in config:
-                    end_line = configs.index(config)
-                    break
+                if "第五区域" in config:
+                    if "↓" in config:
+                        start_line = configs.index(config) + 1
+                    elif "↑" in config:
+                        end_line = configs.index(config)
+                        break
             for config in configs[start_line:end_line]:
                 if "export" in config and "##" not in config:
                     kv = config.replace("export ", "")
@@ -36,10 +37,7 @@ async def mychangeexport(event):
                         vname = re.findall(r"[^\"']+(?=\"|')", kv)[1]
                     except:
                         vname = '你没有设置任何值'
-                    if " # " in kv:
-                        note = re.findall(r"(?<=#\s).*", kv)[0]
-                    else:
-                        note = 'none'
+                    note = re.findall(r"(?<=#\s).*", kv)[0] if " # " in kv else 'none'
                     knames.append(kname), vnames.append(vname), notes.append(note)
                 elif "↓" in config:
                     break
@@ -56,10 +54,7 @@ async def mychangeexport(event):
                         vname = re.findall(r"[^\"']+(?=\"|')", kv)[1]
                     except:
                         vname = '你没有设置任何值'
-                    if " # " in kv:
-                        note = re.findall(r"(?<=#\s).*", kv)[0]
-                    else:
-                        note = 'none'
+                    note = re.findall(r"(?<=#\s).*", kv)[0] if " # " in kv else 'none'
                     knames.append(kname), vnames.append(vname), notes.append(note)
         for i in range(len(knames)):
             if notes[i] != 'none':
@@ -143,7 +138,7 @@ async def mychangeexport(event):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + sys._getframe().f_code.co_name
+        function = f"函数名：{sys._getframe().f_code.co_name}"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n\n{tip}")
         logger.error(f"错误--->{str(e)}")

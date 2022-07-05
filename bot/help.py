@@ -7,10 +7,7 @@ from ..bot.utils import V4
 async def bot_help(event):
     """接收/help命令后执行程序"""
     msg_text = event.raw_text.split(' ')
-    if len(msg_text) == 2:
-        text = msg_text[-1]
-    else:
-        text = 'mhelp'
+    text = msg_text[-1] if len(msg_text) == 2 else 'mhelp'
     if V4:
         mhelp = '''
 a-自定义快捷按钮
@@ -41,7 +38,6 @@ cx-查询当前运行的进程
 upgd-更新gd监控代码
 clean-清理缓存日志'''
         bean = '/bean 加数字，获取该账户近期收支情况\n/bean in\\out获取所有账户近期收或支情况\n/bean 获取账户总豆数量'
-        cmd = '/cmd用于执行shell命令，如果命令持续10分钟仍未结束，将强行终止，以保障机器人响应'
         edit = '/edit 进入/jd目录选择文件进行编辑，仅限简易编辑\n/edit /jd/config进入config目录选择文件编辑\n/edit /jd/config/config.sh 直接编辑config.sh文件'
         node = '/node 用于执行js脚本 用法：\n/node /jd/own/abc/def.js'
         getfile = '/getfile 进入/jd目录选择文件进行获取\n/getfile /jd/config进入config目录选择文件获取\n/getfile /jd/config/config.sh 直接获取config.sh文件'
@@ -76,11 +72,11 @@ cx-查询当前运行的进程
 upgd-更新gd监控代码
 clean-清理缓存日志'''
         bean = '/bean 加数字，获取该账户近期收支情况'
-        cmd = '/cmd用于执行shell命令，如果命令持续10分钟仍未结束，将强行终止，以保障机器人响应'
         edit = '/edit 进入/ql目录选择文件进行编辑，仅限简易编辑\n/edit /ql/config进入config目录选择文件编辑\n/edit /ql/config/config.sh 直接编辑config.sh文件'
         node = '/node 用于执行js脚本 用法：\n/node /ql/own/abc/def.js'
         getfile = '/getfile 进入/jd目录选择文件进行获取\n/getfile /ql/config进入config目录选择文件获取\n/getfile /ql/config/config.sh 直接获取config.sh文件'
         setshort = '/setshort 用于设置快捷方式，格式如下：\nAAA-->BBB这种格式使用/a选择\n/bean 1\n/edit /ql/config/config.sh\n以“/”开头的为机器人命令快捷，使用/b选择'
+    cmd = '/cmd用于执行shell命令，如果命令持续10分钟仍未结束，将强行终止，以保障机器人响应'
     snode = '/snode 选择脚本并运行'
     chart = '/chart 加数字，统计该账户近期收支情况'
     botset = '''    /set

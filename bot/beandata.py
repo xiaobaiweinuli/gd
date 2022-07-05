@@ -17,18 +17,23 @@ url = "https://api.m.jd.com/api"
 
 
 def gen_body(page):
-    body = {
-        "beginDate": datetime.datetime.utcnow().replace(tzinfo=timezone.utc).astimezone(SHA_TZ).strftime("%Y-%m-%d %H:%M:%S"),
-        "endDate": datetime.datetime.utcnow().replace(tzinfo=timezone.utc).astimezone(SHA_TZ).strftime("%Y-%m-%d %H:%M:%S"),
+    return {
+        "beginDate": datetime.datetime.utcnow()
+        .replace(tzinfo=timezone.utc)
+        .astimezone(SHA_TZ)
+        .strftime("%Y-%m-%d %H:%M:%S"),
+        "endDate": datetime.datetime.utcnow()
+        .replace(tzinfo=timezone.utc)
+        .astimezone(SHA_TZ)
+        .strftime("%Y-%m-%d %H:%M:%S"),
         "pageNo": page,
         "pageSize": 20,
     }
-    return body
 
 
 def gen_params(page):
     body = gen_body(page)
-    params = {
+    return {
         "functionId": "jposTradeQuery",
         "appid": "swat_miniprogram",
         "client": "tjj_m",
@@ -36,9 +41,8 @@ def gen_params(page):
         "sdkVersion": "1.0.0",
         "clientVersion": "3.1.3",
         "timestamp": int(round(time.time() * 1000)),
-        "body": json.dumps(body)
+        "body": json.dumps(body),
     }
-    return params
 
 
 def get_beans_7days(ck):
@@ -55,28 +59,32 @@ def get_beans_7days(ck):
             "Cookie": ck,
             "Referer": "https://servicewechat.com/wxa5bf5ee667d91626/141/page-frame.html",
         }
-        days = []
-        for i in range(0, 7):
-            days.append((datetime.date.today() - datetime.timedelta(days=i)).strftime("%Y-%m-%d"))
+        days = [
+            (datetime.date.today() - datetime.timedelta(days=i)).strftime(
+                "%Y-%m-%d"
+            )
+            for i in range(7)
+        ]
+
         beans_in = {key: 0 for key in days}
         beans_out = {key: 0 for key in days}
         while day_7:
             page = page + 1
             resp = session.get(url, params=gen_params(page), headers=headers, timeout=100).text
             res = json.loads(resp)
-            if res['resultCode'] == 0:
-                for i in res['data']['list']:
-                    for date in days:
-                        if str(date) in i['createDate'] and i['amount'] > 0:
+            if res['resultCode'] != 0:
+                return {'code': 400, 'data': res}
+            for i in res['data']['list']:
+                for date in days:
+                    if str(date) in i['createDate']:
+                        if i['amount'] > 0:
                             beans_in[str(date)] = beans_in[str(date)] + i['amount']
                             break
-                        elif str(date) in i['createDate'] and i['amount'] < 0:
+                        elif i['amount'] < 0:
                             beans_out[str(date)] = beans_out[str(date)] + i['amount']
                             break
-                    if i['createDate'].split(' ')[0] not in str(days):
-                        day_7 = False
-            else:
-                return {'code': 400, 'data': res}
+                if i['createDate'].split(' ')[0] not in str(days):
+                    day_7 = False
         return {'code': 200, 'data': [beans_in, beans_out, days]}
     except Exception as e:
         logger.error(str(e))
@@ -104,25 +112,20 @@ def get_total_beans(ck):
 
 def get_bean_data(i):
     try:
-        if QL:
-            ckfile = AUTH_FILE
-        else:
-            ckfile = CONFIG_SH_FILE
-        cookies = get_cks(ckfile)
-        if cookies:
+        ckfile = AUTH_FILE if QL else CONFIG_SH_FILE
+        if cookies := get_cks(ckfile):
             ck = cookies[i-1]
             beans_res = get_beans_7days(ck)
             beantotal = get_total_beans(ck)
             if beans_res['code'] != 200:
                 return beans_res
-            else:
-                beans_in, beans_out = [], []
-                beanstotal = [int(beantotal), ]
-                for i in beans_res['data'][0]:
-                    beantotal = int(beantotal) - int(beans_res['data'][0][i]) - int(beans_res['data'][1][i])
-                    beans_in.append(int(beans_res['data'][0][i]))
-                    beans_out.append(int(str(beans_res['data'][1][i]).replace('-', '')))
-                    beanstotal.append(beantotal)
+            beans_in, beans_out = [], []
+            beanstotal = [int(beantotal), ]
+            for i in beans_res['data'][0]:
+                beantotal = int(beantotal) - int(beans_res['data'][0][i]) - int(beans_res['data'][1][i])
+                beans_in.append(int(beans_res['data'][0][i]))
+                beans_out.append(int(str(beans_res['data'][1][i]).replace('-', '')))
+                beanstotal.append(beantotal)
             return {'code': 200, 'data': [beans_in[::-1], beans_out[::-1], beanstotal[::-1], beans_res['data'][2][::-1]]}
     except Exception as e:
         logger.error(str(e))

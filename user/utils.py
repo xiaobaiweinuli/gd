@@ -39,14 +39,19 @@ async def execute(msg, info, exectext):
             return
         else:
             try:
-                logtime = f'执行时间：' + re.findall(r'脚本执行- 北京时间.UTC.8.：(.*?)=', res, re.S)[0] + '\n'
+                logtime = (
+                    '执行时间：'
+                    + re.findall(r'脚本执行- 北京时间.UTC.8.：(.*?)=', res, re.S)[0]
+                    + '\n'
+                )
+
                 info += logtime
             except Exception as e:
                 pass
             errinfo = '\n\n**——‼错误代码493，IP可能黑了‼——**\n' if re.search('Response code 493', res) else ''
             if len(info + res + errinfo) <= 4000:
                 await msg.edit(info + res + errinfo)
-            elif len(info + res + errinfo) > 4000:
+            else:
                 tmp_log = f'{LOG_DIR}/bot/{exectext.split("/")[-1].split(".js")[0].split(".py")[0].split(".sh")[0].split(".ts")[0].split(" ")[-1]}-{datetime.datetime.now().strftime("%H-%M-%S.%f")}.log'
                 with open(tmp_log, 'w+', encoding='utf-8') as f:
                     f.write(res)
@@ -56,8 +61,8 @@ async def execute(msg, info, exectext):
     except Exception as e:
         title = "【💥错误💥】"
         name = "文件名：" + os.path.split(__file__)[-1].split(".")[0]
-        function = "函数名：" + e.__traceback__.tb_frame.f_code.co_name
-        details = "错误详情：第 " + str(e.__traceback__.tb_lineno) + " 行"
+        function = f"函数名：{e.__traceback__.tb_frame.f_code.co_name}"
+        details = f"错误详情：第 {str(e.__traceback__.tb_lineno)} 行"
         tip = '建议百度/谷歌进行查询'
         await jdbot.send_message(chat_id, f"{title}\n\n{name}\n{function}\n错误原因：{str(e)}\n{details}\n{traceback.format_exc()}\n{tip}")
         logger.error(f"错误--->{str(e)}")

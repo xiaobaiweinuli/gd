@@ -9,10 +9,7 @@ async def my_cmd(event):
     logger.info(f'即将执行{event.raw_text}命令')
     msg_text = event.raw_text.split(' ')
     try:
-        if isinstance(msg_text, list):
-            text = ' '.join(msg_text[1:])
-        else:
-            text = None
+        text = ' '.join(msg_text[1:]) if isinstance(msg_text, list) else None
         if START_CMD and text:
             await cmd(text)
             logger.info(text)
